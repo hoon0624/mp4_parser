@@ -1,15 +1,24 @@
-import java.io.IOException;
 import java.io.InputStream;
 
 public class FullBox extends Box{
 	
-	private int version;
-	private int flags;
+	protected int version;
+	protected int flags;
 	
-	FullBox(InputStream stream, int position) throws IOException {
-		super(stream, position);
+	FullBox(InputStream stream, int size, String type, int position) {
+		super(stream, size, type, position);
 		this.version = this.readStreamAsInt(stream, 1);
 		this.flags = this.readStreamAsInt(stream, 3);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder str = new StringBuilder();
+		str.append(super.toString());
+		str.append("Version: " + this.version + "\n");
+		str.append("Flags: " + this.flags + "\n");
+		
+		return str.toString();
 	}
 
 }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class mp4Parser {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		String sourceFilePath = "../mp4 Parser/file_example_MP4_480_1_5MG.mp4";
 		
 		try {
@@ -29,36 +29,33 @@ public class mp4Parser {
 			int endOfFilePos = inputStream.available();
 			int pos = 0;
 			while(!isEndOfFile) {
-				inputStream.mark(8);
 				int size = getSize(inputStream);
-				System.out.println("Size: " + size);
 				String type = getType(inputStream);
-				inputStream.reset();
-				System.out.println(inputStream.available());
-				Box box = constructBox(inputStream, type, pos);
+				pos += 8;
+				Box box = constructBox(inputStream, size, type, pos);
+				System.out.println(box);
 				pos = box.getEndPos();
 				if(pos == endOfFilePos) {
 					isEndOfFile = true;
 				}
 			}
 		} catch(Exception e) {
-			System.out.println(e);
+			throw(e);
 		}
 	}
 	
-	public static Box constructBox(InputStream stream, String type, int pos) throws IOException {
+	public static Box constructBox(InputStream stream, int size, String type, int pos) throws Exception {
 		switch(type) {
 		case "ftyp":
-			return new FTYP(stream, pos);
-//		case "moov":
-//			return new MOOV(stream, pos);
+			return new FTYP(stream, size, type,pos);
+		case "moov":
+			return new MOOV(stream, size, type, pos);
 		default:
-			return new nullBox(stream, pos);
+			return new nullBox(stream,size, type, pos);
 		}
 	}
 	
 	public static int getSize(InputStream stream) {
-		
 		byte[] b = new byte[4];
 		String hex = "";
 		try {
