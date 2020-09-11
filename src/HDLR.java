@@ -1,13 +1,13 @@
 import java.io.InputStream;
 
-public class HDRL extends FullBox {
+public class HDLR extends FullBox {
 	
 	private int predefined = 0;
 	private String handlerType;
 	private int[] reserved = new int[3];
 	private String name;
 	
-	HDRL(InputStream stream, int size, String type, int position) {
+	HDLR(InputStream stream, int size, String type, int position) {
 		super(stream, size, type, position);
 		position += 4;
 		this.predefined = this.readStreamAsInt(stream, 4);
@@ -17,6 +17,10 @@ public class HDRL extends FullBox {
 		}
 		position += 20;
 		this.name = this.readStreamAsString(stream, this.endPos - position);
+	}
+	
+	public String getHandlerType() {
+		return this.handlerType;
 	}
 	
 	@Override

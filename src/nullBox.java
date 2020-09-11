@@ -6,5 +6,4 @@ public class nullBox extends Box {
 		super(stream, size, type, position);
 		this.skipToNextBox(stream, 8);
 	}
-
 }

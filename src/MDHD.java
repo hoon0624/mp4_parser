@@ -17,7 +17,7 @@ public class MDHD extends FullBox {
 		this.timeScale = this.readStreamAsInt(stream, 4);
 		this.duration = this.readStreamAsInt(stream, 4);
 		this.language = this.readStreamAsInt(stream, 2);
-		this.quality = this.readStreamAsInt(stream, 4);
+		this.quality = this.readStreamAsInt(stream, 2);
 	}
 	
 	@Override 

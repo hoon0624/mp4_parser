@@ -1,37 +1,43 @@
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class MDIA extends Box {
-	
+public class STBL extends Box {
+
 	ArrayList<Box> childBoxes = new ArrayList<>();
-	private Box MDHD;
-	private HDLR HDLR;
-	private Box MINF;
+	private Box STSD;
 	
-	MDIA(InputStream stream, int size, String type, int position) throws Exception {
+	STBL(InputStream stream, int size, String type, int position) throws Exception {
 		super(stream, size, type, position);
+		System.out.println(this.endPos);
 		while(position < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
 			position += 8;
 			Box box = constructBox(stream, boxSize, boxType, position);
-			childBoxes.add(box);
+			this.childBoxes.add(box);
 			position = box.endPos;
-			System.out.println("MDIA: " + box.endPos);
-			System.out.println("MDIA available: " + stream.available());
+		}
+	}
+	
+	STBL(InputStream stream, int size, String type, int position, String hdlrType) throws Exception {
+		super(stream, size, type, position, hdlrType);
+		System.out.println(this.endPos);
+		while(position < this.endPos) {
+			int boxSize = this.readStreamAsInt(stream, 4);
+			String boxType = this.readStreamAsString(stream, 4);
+			position += 8;
+			System.out.println("STBL: " + boxType);
+			Box box = constructBox(stream, boxSize, boxType, position);
+			this.childBoxes.add(box);
+			position = box.endPos;
 		}
 	}
 	
 	private Box constructBox(InputStream stream, int size, String type, int position) throws Exception {
 		switch(type) {
-		case "mdhd":
-			return new MDHD(stream, size, type, position);
-		case "hdlr":
-			this.HDLR = new HDLR(stream, size, type, position);
-			this.hdlrType = this.HDLR.getHandlerType();
-			return this.HDLR;
-		case "minf":
-			return new MINF(stream, size, type, position, this.hdlrType);
+		case "stsd":
+			this.STSD = new STSD(stream, size, type, position, this.hdlrType);
+			return this.STSD;
 		default:
 			return new nullBox(stream, size, type, position);
 		}

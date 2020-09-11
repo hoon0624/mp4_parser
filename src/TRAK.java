@@ -19,6 +19,7 @@ public class TRAK extends Box {
 			Box box = this.constructBox(stream, boxSize, boxType, position);
 			this.childBoxes.add(box);
 			position = box.endPos;
+			System.out.println("TRAK: " + box.endPos);
 		}
 	}
 	

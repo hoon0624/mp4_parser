@@ -27,6 +27,7 @@ public class mp4Parser {
 			
 			boolean isEndOfFile = false;
 			int endOfFilePos = inputStream.available();
+			System.out.println(endOfFilePos);
 			int pos = 0;
 			while(!isEndOfFile) {
 				int size = getSize(inputStream);
@@ -35,7 +36,7 @@ public class mp4Parser {
 				Box box = constructBox(inputStream, size, type, pos);
 				System.out.println(box);
 				pos = box.getEndPos();
-				if(pos == endOfFilePos) {
+				if(pos >= endOfFilePos) {
 					isEndOfFile = true;
 				}
 			}

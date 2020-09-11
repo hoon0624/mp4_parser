@@ -3,6 +3,8 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class Box {
@@ -10,12 +12,21 @@ public class Box {
 	protected String type;
 	protected int startPos;
 	protected int endPos;
+	protected String hdlrType = "";
 	
 	Box(InputStream stream, int size, String type, int position) {
 		this.size = size;
 		this.type = type;
 		this.startPos = position - 8;
 		this.endPos = this.startPos + size;
+	}
+	
+	Box(InputStream stream, int size, String type, int position, String hdlrType) {
+		this.size = size;
+		this.type = type;
+		this.startPos = position - 8;
+		this.endPos = this.startPos + size;
+		this.hdlrType = hdlrType;
 	}
 	
 	protected String readStreamAsString(InputStream stream, int numByte) {
@@ -130,9 +141,5 @@ public class Box {
 	
 	public int getEndPos() {
 		return this.endPos;
-	}
-	
-	public int getStartPos() {
-		return this.startPos;
 	}
 }

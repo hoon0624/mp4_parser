@@ -16,7 +16,9 @@ public class MOOV extends Box {
 			position += 8;
 			Box box = constructBox(stream, boxSize, boxType, position);
 			this.childBoxes.add(box);
-			position = box.getEndPos();
+			position = box.endPos;
+			System.out.println("MOOV: " + box.endPos);
+			System.out.println("MOOV size: " + boxSize);
 		}
 	}
 	
