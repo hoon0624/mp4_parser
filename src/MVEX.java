@@ -1,13 +1,15 @@
 import java.util.ArrayList;
 /*
- * Movie Fragment Random Access Box provides a table which may assist readers in finding 
- * random access points in a file using movie fragments
+ * Movie Extend Box warns readers that there might be Movie Fragment Boxes in this file
+ * To know of all samples in the tracks, these Movie Fragment Boxes must be found and scanned
  */
-public class MFRA extends Box {
+public class MVEX extends Box{
 	
+	private MEHD MEHD;
+	private TREX TREX;
 	private ArrayList<Box> childBoxes = new ArrayList<>();
 	
-	MFRA(MP4Stream stream, int size, String type) throws Exception {
+	MVEX(MP4Stream stream, int size, String type) throws Exception {
 		super(stream, size, type);
 		while(stream.getPos() < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);
@@ -16,14 +18,16 @@ public class MFRA extends Box {
 		}
 	}
 	
-	private Box constructBox(MP4Stream stream, int boxSize, String boxType) throws Exception {
-		switch(boxType) {
-		case "tfra":
-			return new TFRA(stream, boxSize, boxType);
-		case "mfro":
-			return new MFRO(stream, boxSize, boxType);
+	private Box constructBox(MP4Stream stream, int size, String type) throws Exception {
+		switch(type) {
+		case "mehd":
+			this.MEHD = new MEHD(stream, size, type);
+			return this.MEHD;
+		case "trex":
+			this.TREX = new TREX(stream, size, type);
+			return this.TREX;
 		default:
-			return new nullBox(stream, boxSize, boxType);
+			return new nullBox(stream, size, type);	
 		}
 	}
 	
@@ -37,4 +41,5 @@ public class MFRA extends Box {
 		}
 		return str.toString().replaceAll("\t*\n\t+$", "");
 	}
+	
 }

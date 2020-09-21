@@ -20,7 +20,7 @@ public class MINF extends Box {
 		}
 	}
 	
-	MINF(MP4Stream stream, int size, String type, int position, String hdlerType) throws Exception {
+	MINF(MP4Stream stream, int size, String type, String hdlerType) throws Exception {
 		super(stream, size, type, hdlerType);
 		while(stream.getPos() < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);

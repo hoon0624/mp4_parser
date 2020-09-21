@@ -5,6 +5,7 @@ public class MOOV extends Box {
 	private ArrayList<Box> childBoxes = new ArrayList<>();
 	private MVHD MVHD;
 	private IODS IODS;
+	private MVEX MVEX;
 	private ArrayList<TRAK> TRAKS = new ArrayList<>();
 	
 	MOOV(MP4Stream stream, int size, String type) throws Exception {
@@ -30,6 +31,9 @@ public class MOOV extends Box {
 			return trak;
 		case "udta":
 			return new UDTA(stream, size, type);
+		case "mvex":
+			this.MVEX = new MVEX(stream, size, type);
+			return this.MVEX;
 		default:
 			return new nullBox(stream, size, type);
 		}

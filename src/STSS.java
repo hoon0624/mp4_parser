@@ -6,7 +6,6 @@ public class STSS extends FullBox {
 	
 	private int entry_count;
 	private ArrayList<Integer> entries = new ArrayList<>(); 
-	private ArrayList<Integer> test = new ArrayList<>();
 
 	STSS(MP4Stream stream, int size, String type) throws Exception {
 		super(stream, size, type);
@@ -19,12 +18,7 @@ public class STSS extends FullBox {
 	public ArrayList<Integer> getKeyFrames() {
 		return this.entries;
 	}
-	
-	public ArrayList<Integer> getIframes() {
-		this.test.add(1);
-		return test;
-	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();

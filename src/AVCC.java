@@ -23,6 +23,7 @@ public class AVCC extends Box {
 		readParameterSets(stream, this.numOfSequenceParameterSets);
 		this.numOfPictureParamterSets = this.readStreamAsBits(stream, 255);
 		readParameterSets(stream, this.numOfPictureParamterSets);
+		this.skipToNextBox(stream);
 	}
 	
 	private void readParameterSets(InputStream stream, int numOfParamterSets) throws Exception {

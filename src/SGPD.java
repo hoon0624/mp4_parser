@@ -11,7 +11,6 @@ public class SGPD extends FullBox {
 		super(stream, size, type);
 		this.grouping_type = this.readStreamAsString(stream, 4);
 		this.entry_count = this.readStreamAsInt(stream, 4);
-//		this.skipToNextBox(stream, 20);
 		this.skipToNextBox(stream);
 	}
 	

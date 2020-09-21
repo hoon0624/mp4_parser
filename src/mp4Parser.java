@@ -8,8 +8,9 @@ public class mp4Parser {
 		String bigBuckBunny = "../../Downloads/BigBuckBunny2.mp4";
 		String fragSourceFilePath = "../../Downloads/fileExampleMP4.mp4";
 		String certainaccel = "../../Downloads/02_A_Certain_Scientific_Accelerator.mp4";
+		String fragmentedMP4 = "../../Downloads/video_960_30.mp4";
 		try {
-			MP4Stream inputStream = new MP4Stream(certainaccel);
+			MP4Stream inputStream = new MP4Stream(fragmentedMP4);
 			int endOfFilePos = inputStream.available();
 			ArrayList<Box> mp4 = new ArrayList<>();
 			ContainerBox container = new ContainerBox();
@@ -21,6 +22,7 @@ public class mp4Parser {
 				size = getSize(inputStream);
 				type = getType(inputStream);
 				Box box = constructBox(inputStream, size, type);
+				System.out.println(box);
 				mp4.add(box);
 				container.add(box);
 			}
@@ -51,6 +53,10 @@ public class mp4Parser {
 			return new UDTA(stream, size, type);
 		case "moof":
 			return new MOOF(stream, size , type);
+		case "mfra":
+			return new MFRA(stream, size, type);
+		case "sidx":
+			return new SIDX(stream, size, type);
 		default:
 			return new nullBox(stream,size, type);
 		}
@@ -106,6 +112,10 @@ public class mp4Parser {
 				boxes.add((MOOF) box);
 			} else if(box.type.equals("udta")) {
 				boxes.add((UDTA) box);
+			} else if(box.type.equals("mfra")) {
+				boxes.add((MFRA) box);
+			} else if(box.type.equals("sidx")) {
+				boxes.add((SIDX) box);
 			} else {
 				boxes.add(box);
 			}

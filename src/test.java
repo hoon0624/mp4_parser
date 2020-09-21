@@ -45,15 +45,11 @@ public class test {
 //		System.out.println(stbl);
 //		
 //		System.out.println(stbl.getStss().getKeyFrames());
+	
+		int n = 207;
+		n = ((n & 127) << 24);
 		
-		ArrayList<String[]> strarry = new ArrayList<>();
-		int flag = 1;
-		switch(flag) {
-		case 1: 
-			System.out.println("TEST WORKS");
-		case 8:
-			System.out.println("WTF");
-		}
+		System.out.println(n);
 	}
 	
 	public static long readTimeFields(InputStream stream, int numByte) {

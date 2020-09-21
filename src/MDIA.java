@@ -28,7 +28,7 @@ public class MDIA extends Box {
 			this.hdlrType = this.HDLR.getHandlerType();
 			return this.HDLR;
 		case "minf":
-			this.MINF = new MINF(stream, size, type);
+			this.MINF = new MINF(stream, size, type, this.hdlrType);
 			return this.MINF;
 		default:
 			return new nullBox(stream, size, type);

@@ -27,6 +27,12 @@ public class TRAF extends Box {
 			TRUN trun = new TRUN(stream, size, type);
 			this.TRUNs.add(trun); 
 			return trun;
+		case "tfdt" :
+			TFDT tfdt = new TFDT(stream, size, type);
+			return tfdt;
+		case "sdtp" :
+			SDTP sdtp = new SDTP(stream, size, type);
+			return sdtp;
 		default: 
 			return new nullBox(stream, size, type);
 		}

@@ -14,8 +14,7 @@ public class MOOF extends Box {
 		while(stream.getPos() < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			Box box = constructBox(stream, boxSize, boxType);
-			childBoxes.add(box);
+			childBoxes.add(constructBox(stream, boxSize, boxType));
 		}
 	}
 	

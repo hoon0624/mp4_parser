@@ -35,7 +35,8 @@ public class VisualSampleEntry extends SampleEntry {
 		while(stream.getPos() < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			this.childBoxes.add(constructBox(stream, boxSize, boxType));
+			Box box = constructBox(stream, boxSize, boxType);
+			this.childBoxes.add(box);
 		}
 	}
 	
