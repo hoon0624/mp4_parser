@@ -1,13 +1,13 @@
-import java.io.InputStream;
-
+/*
+ * Sound Media Header contains general presentation information for audo media
+ */
 public class SMHD extends FullBox {
 
-	private int balance;
-	private int reserved;
+	private int balance;	// 16 bits
+	private int reserved;	// 16 bits
 	
-	SMHD(InputStream stream, int size, String type, int position) {
-		super(stream, size, type, position);
-		position += 4;
+	SMHD(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
 		this.balance = this.readStreamAsInt(stream, 2);
 		this.reserved = this.readStreamAsInt(stream, 2);
 	}
@@ -21,5 +21,4 @@ public class SMHD extends FullBox {
 		
 		return str.toString();
 	}
-
 }

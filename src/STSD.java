@@ -1,56 +1,42 @@
-import java.io.InputStream;
 import java.util.ArrayList;
-
+/*
+ * Sample Description Box
+ */
 public class STSD extends FullBox {
 
 	ArrayList<Box> childBoxes = new ArrayList<>();
 	private int entry_count;
 	
-	STSD(InputStream stream, int size, String type, int position) throws Exception {
-		super(stream, size, type, position);
-		position += 4;
+	STSD(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
 		this.entry_count = this.readStreamAsInt(stream, 4);
-		position += 4;
-		
 		for(int i=0; i<this.entry_count; i++) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			position += 8;
-			Box box = constructBox(stream, boxSize, boxType, position);
-			childBoxes.add(box);
-			position = box.endPos;
+			childBoxes.add(constructBox(stream, boxSize, boxType));
 		}
 	}
 	
-	STSD(InputStream stream, int size, String type, int position, String hdlrType) throws Exception {
-		super(stream, size, type, position, hdlrType);
-		position += 4;
+	STSD(MP4Stream stream, int size, String type, String hdlrType) throws Exception {
+		super(stream, size, type, hdlrType);
 		this.entry_count = this.readStreamAsInt(stream, 4);
-		position += 4;
-		
 		for(int i=0; i<this.entry_count; i++) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			position += 8;
-			Box box = constructBox(stream, boxSize, boxType, position);
-			System.out.println(box);
-			childBoxes.add(box);
-			position = box.endPos;
+			childBoxes.add(constructBox(stream, boxSize, boxType));
 		}
 	}
 	
-	private Box constructBox(InputStream stream, int size, String type, int position) throws Exception {
+	private Box constructBox(MP4Stream stream, int size, String type) throws Exception {
 		switch(this.hdlrType) {
 		case "soun":
-			return new AudioSampleEntry(stream, size, type, position);
+			return new AudioSampleEntry(stream, size, type);
 		case "vide":
-			return new VisualSampleEntry(stream, size, type, position);
-//		case "hint":
-//			return new HintSampleEntry(stream, size, type, position);
-//		case "meta":
-//			return new MetadataSampleEntry(stream, size, type, position);
+			return new VisualSampleEntry(stream, size, type);
+		case "hint":
+			return new HintSampleEntry(stream, size, type);
 		default:
-			return new nullBox(stream, size, type, position);
+			return new nullBox(stream, size, type);
 		}
 	}
 	

@@ -1,22 +1,26 @@
-import java.io.InputStream;
-import java.util.Arrays;
-
+/*
+ * Movie Header Box defines overall info which is media-independent, and relevant to the entire presentation
+ */
 public class MVHD extends FullBox {
 
-	private long creationTime;
-	private long modificationTime;
-	private int timeScale;
-	private int duration;
+	private long creationTime;		// (ver_1) 64 bits or (ver_0) 32 bits
+	private long modificationTime;	// (ver_1) 64 bits or (ver_0) 32 bits
+	private int timeScale;			// 32 bits
+	private int duration;			// (ver_1) 64 bits or (ver_0) 32 bits
 	
-	MVHD(InputStream stream, int size, String type, int position) throws Exception {
-		super(stream, size, type, position);
-		position += 4;
-		this.creationTime = this.readTimeFields(stream, 4);
-		this.modificationTime = this.readTimeFields(stream, 4);
+	MVHD(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
+		int numByte;
+		if(this.version == 0) {
+			numByte = 4;
+		} else {
+			numByte= 8;
+		}
+		this.creationTime = this.readTimeFields(stream, numByte);
+		this.modificationTime = this.readTimeFields(stream, numByte);
 		this.timeScale = this.readStreamAsInt(stream, 4);
-		this.duration = this.readStreamAsInt(stream, 4);
-		position += 12;
-		this.skipToNextBox(stream, 28);
+		this.duration = this.readStreamAsInt(stream, numByte);
+		this.skipToNextBox(stream);
 	}
 	
 	@Override

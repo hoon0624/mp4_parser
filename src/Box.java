@@ -3,8 +3,6 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import java.util.TimeZone;
 
 public class Box {
@@ -14,63 +12,46 @@ public class Box {
 	protected int endPos;
 	protected String hdlrType = "";
 	
-	Box(InputStream stream, int size, String type, int position) {
+	Box(MP4Stream stream, int size, String type) throws Exception {
 		this.size = size;
 		this.type = type;
-		this.startPos = position - 8;
+		this.startPos = stream.getPos() - 8;
 		this.endPos = this.startPos + size;
 	}
 	
-	Box(InputStream stream, int size, String type, int position, String hdlrType) {
+	Box(MP4Stream stream, int size, String type, String hdlrType) throws IOException {
 		this.size = size;
 		this.type = type;
-		this.startPos = position - 8;
+		this.startPos = stream.getPos() - 8;
 		this.endPos = this.startPos + size;
 		this.hdlrType = hdlrType;
 	}
 	
-	protected String readStreamAsString(InputStream stream, int numByte) {
-		try {
-			byte[] b = new byte[numByte];
-			char[] c = new char[numByte];
-			int data = stream.read(b, 0, numByte);
-			if(data != -1) {
-				for(int i=0; i<numByte; i++) {
-					c[i] = (char) b[i];
-				}
-				return new String(c);
-			} else {
-				return "";
+	protected String readStreamAsString(InputStream stream, int numByte) throws Exception {
+		byte[] b = new byte[numByte];
+		char[] c = new char[numByte];
+		int data = stream.read(b, 0, numByte);
+		if(data != -1) {
+			for(int i=0; i<numByte; i++) {
+				c[i] = (char) b[i];
 			}
-		} catch(Exception e) {
-			System.out.println("ERRORRRR");
-			e.printStackTrace();
+			return new String(c);
+		} else {
+			return "";
 		}
-		return "";
 	}
 	
-	protected int readStreamAsInt(InputStream stream, int numByte) {
+	protected int readStreamAsInt(InputStream stream, int numByte) throws Exception {
 		byte[] b = new byte[numByte];
-		String hex = "";
-		try {
-			int data = stream.read(b, 0, numByte);
-			if(data != -1) {
-				for(int i=0; i<numByte; i++) {
-					String str = Integer.toHexString(b[i] & 0xFF);
-					if(str.length() == 1) {
-						str = "0"+ str;
-					}
-					hex += str;
-				}
-				return Integer.parseInt(hex, 16);
-			} else {
-				return 0;
+		int data = stream.read(b, 0, numByte);
+		int res = 0;
+		if(data != -1) {
+			for(int i=0; i<numByte; i++) {
+				int num = b[i] &0xFF;
+				res += (num << 8*(numByte-1-i));
 			}
-		} catch(Exception e) {
-			System.out.println("ERROR");
-			e.printStackTrace();
 		}
-		return Integer.parseInt(hex, 16);
+		return res;
 	}
 	
 	protected long readTimeFields(InputStream stream, int numByte) throws Exception {
@@ -89,8 +70,8 @@ public class Box {
 	
 	protected double readFixedPointVal(InputStream stream, int numByte) throws Exception {
 		byte[] data = new byte[numByte];
-		StringBuilder hex1 = new StringBuilder();
-		StringBuilder hex2 = new StringBuilder();
+		String hex1 = "";
+		String hex2 = "";
 		stream.read(data);
 		int half = numByte/2;
 		for(int i=0; i<numByte; i++) {
@@ -99,23 +80,19 @@ public class Box {
 				str = "0" + str;
 			}
 			if(i < half) {
-				hex1.append(str);
+				hex1 += str;
 			} else {
-				hex2.append(str);
+				hex2 += str;
 			}
 		}
-		String s = Integer.parseInt(hex1.toString(), 16) + "." + Integer.parseInt(hex2.toString(), 16);
+		String s = Integer.parseInt(hex1, 16) + "." + Integer.parseInt(hex2, 16);
 		return Double.parseDouble(s);
 	}
-	
-	protected void skipToNextBox(InputStream stream, int numByte) throws Exception {
-		int byteToSkip = this.size - numByte;
+
+	protected void skipToNextBox(MP4Stream stream) throws IOException {
+		int byteToSkip = this.endPos - (int) stream.getPos();
 		byte[] data = new byte[byteToSkip];
-		try {
-			stream.read(data);
-		} catch(Exception e) {
-			throw e;
-		}
+		stream.read(data);
 	}
 	
 	protected String convertToDate(long seconds) {
@@ -129,6 +106,15 @@ public class Box {
 		return format.format(date);
 	}
 	
+	// read stream as binary
+	protected int readStreamAsBits(InputStream stream, int bit) throws Exception{
+		byte data[] = new byte[1];
+		stream.read(data);
+		int bin = data[0] & 0xFF;
+		
+		return bin & bit;
+	}
+	
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		str.append("Box Type: " + this.type + "\n");
@@ -137,9 +123,5 @@ public class Box {
 		str.append("End position: " + this.endPos + "\n");
 		
 		return str.toString();
-	}
-	
-	public int getEndPos() {
-		return this.endPos;
 	}
 }

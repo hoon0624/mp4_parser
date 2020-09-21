@@ -1,22 +1,21 @@
-import java.io.InputStream;
-
+/*
+ * Handler Reference Box
+ */
 public class HDLR extends FullBox {
 	
-	private int predefined = 0;
-	private String handlerType;
-	private int[] reserved = new int[3];
-	private String name;
+	private int predefined = 0;		// 32 bits
+	private String handlerType;		// 32 bits
+	private int[] reserved = new int[3];	// 32 bits each
+	private String name;	// until the end
 	
-	HDLR(InputStream stream, int size, String type, int position) {
-		super(stream, size, type, position);
-		position += 4;
+	HDLR(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
 		this.predefined = this.readStreamAsInt(stream, 4);
 		this.handlerType = this.readStreamAsString(stream, 4);
 		for(int i=0; i<3; i++) {
 			this.reserved[i] = this.readStreamAsInt(stream, 4);
 		}
-		position += 20;
-		this.name = this.readStreamAsString(stream, this.endPos - position);
+		this.name = this.readStreamAsString(stream, this.endPos - stream.getPos());
 	}
 	
 	public String getHandlerType() {
@@ -36,5 +35,4 @@ public class HDLR extends FullBox {
 		
 		return str.toString();
 	}
-	
 }

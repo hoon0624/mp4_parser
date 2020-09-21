@@ -1,12 +1,12 @@
-import java.io.InputStream;
 
 public abstract class SampleEntry extends Box {
 	
-	private int[] reserved = new int[6];
-	private int data_reference_index;
+	protected int[] reserved = new int[6];		// 6 byte
+	protected int data_reference_index;			//2 byte
 	
-	SampleEntry(InputStream stream, int size, String type, int position) {
-		super(stream, size, type, position);
+	SampleEntry(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
+		stream.read(new byte[6]);		// skip reserved
 		this.data_reference_index = this.readStreamAsInt(stream, 2);
 	}
 	

@@ -1,21 +1,16 @@
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-
 public class DREF extends FullBox {
 
-	private ArrayList<Box> childBoxes = new ArrayList<>();
-	private int entry_count;
+	private ArrayList<DataEntryBox> childBoxes = new ArrayList<>();
+	private int entry_count;	// 32 bits
 	
-	DREF(InputStream stream, int size, String type, int position) throws IOException {
-		super(stream, size, type, position);
-		position += 4;
+	DREF(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
 		this.entry_count = this.readStreamAsInt(stream, 4);
 		for(int i=0; i<this.entry_count; i++) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			position += 8;
-			this.childBoxes.add(new DataEntryBox(stream, boxSize, boxType, position));
+			this.childBoxes.add(new DataEntryBox(stream, boxSize, boxType));
 		}
 	}
 

@@ -1,17 +1,16 @@
-import java.io.InputStream;
-
+/*
+ * Edit Box maps the presentation time-line to the media time-line as it is stored in the file
+ */
 public class EDTS extends Box {
 	
 	private ELST elst;
 	
-	EDTS(InputStream stream, int size, String type, int position) throws Exception {
-		super(stream, size, type, position);
-		while(position < this.endPos) {
+	EDTS(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
+		while(stream.getPos() < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			position += 8;
-			this.elst = new ELST(stream, boxSize, boxType, position);
-			position = this.elst.endPos;
+			this.elst = new ELST(stream, boxSize, boxType);
 		}
 	}
 	

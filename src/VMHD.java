@@ -1,13 +1,13 @@
-import java.io.InputStream;
-
+/*
+ * Video Media Header Box
+ */
 public class VMHD extends FullBox {
 	
 	private int grpahicsmode = 0;
 	private int[] opcolor = new int[3];
 	
-	VMHD(InputStream stream, int size, String type, int position) {
-		super(stream, size, type, position);
-		position += 4;
+	VMHD(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
 		this.grpahicsmode = this.readStreamAsInt(stream, 2);
 		for(int i=0; i<3; i++) {
 			this.opcolor[i] = this.readStreamAsInt(stream, 2);

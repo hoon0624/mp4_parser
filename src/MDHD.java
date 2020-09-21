@@ -1,21 +1,22 @@
-import java.io.InputStream;
-
+/*
+ * Media Header Box declares overall info that is media-independent, and relevant to characteristics of media in a track
+ */
 public class MDHD extends FullBox {
 
-	private long creationTime;
-	private long modificationTime;
-	private int timeScale;
-	private int duration;
-	private int language;
-	private int quality;
+	private long creationTime;		// (ver_1) 64 bits or (ver_0) 32 bits
+	private long modificationTime;	// (ver_1) 64 bits or (ver_0) 32 bits
+	private int timeScale;			// 32 bits
+	private int duration;			// (ver_1) 64 bits or (ver_0) 32 bits
+	private int language;			// 15 bits
+	private int quality;			// (pre_defined) 16 bits
 
-	MDHD(InputStream stream, int size, String type, int position) throws Exception {
-		super(stream, size, type, position);
-		position += 4;
-		this.creationTime = this.readTimeFields(stream, 4);
-		this.modificationTime = this.readTimeFields(stream, 4);
+	MDHD(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
+		int numByte = this.getNumOfBytes();
+		this.creationTime = this.readTimeFields(stream, numByte);
+		this.modificationTime = this.readTimeFields(stream, numByte);
 		this.timeScale = this.readStreamAsInt(stream, 4);
-		this.duration = this.readStreamAsInt(stream, 4);
+		this.duration = this.readStreamAsInt(stream, numByte);
 		this.language = this.readStreamAsInt(stream, 2);
 		this.quality = this.readStreamAsInt(stream, 2);
 	}
@@ -33,6 +34,4 @@ public class MDHD extends FullBox {
 		
 		return str.toString();
 	}
-	
-	
 }

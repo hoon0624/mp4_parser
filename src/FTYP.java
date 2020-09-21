@@ -1,17 +1,21 @@
-import java.io.InputStream;
-
+import java.util.ArrayList;
+/*
+ * File Type Box
+ */
 public class FTYP extends Box {
 
-	private String majorBrand;
-	private String minorVersion;
-	private String[] compatBrands = new String[4];
+	private String majorBrand;		// 32 bits
+	private int minorVersion;	// 32 bits
+	private ArrayList<String> compatBrands = new ArrayList<>();		// 32 bits each until the end
 	
-	FTYP(InputStream stream, int size, String type, int position) {
-		super(stream, size, type, position);
+	FTYP(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
 		this.majorBrand = this.readStreamAsString(stream, 4);
-		this.minorVersion = this.readStreamAsString(stream, 4);
-		for(int i=0; i<4; i++) {
-			this.compatBrands[i] = this.readStreamAsString(stream, 4);
+		this.minorVersion = this.readStreamAsInt(stream, 4);
+		int numByteTilEnd = (size-16)/4;
+		for(int i=0; i<numByteTilEnd; i++) {
+			String str = this.readStreamAsString(stream, 4);
+			this.compatBrands.add(str);
 		}
 	}
 	

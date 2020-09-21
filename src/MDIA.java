@@ -1,40 +1,42 @@
-import java.io.InputStream;
 import java.util.ArrayList;
-
+/*
+ * Media Box contains all objects that declare info about media data within a track
+ */
 public class MDIA extends Box {
 	
 	ArrayList<Box> childBoxes = new ArrayList<>();
-	private Box MDHD;
+	private MDHD MDHD;
 	private HDLR HDLR;
-	private Box MINF;
+	private MINF MINF;
 	
-	MDIA(InputStream stream, int size, String type, int position) throws Exception {
-		super(stream, size, type, position);
-		while(position < this.endPos) {
+	MDIA(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
+		while(stream.getPos() < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			position += 8;
-			Box box = constructBox(stream, boxSize, boxType, position);
-			childBoxes.add(box);
-			position = box.endPos;
-			System.out.println("MDIA: " + box.endPos);
-			System.out.println("MDIA available: " + stream.available());
+			childBoxes.add(constructBox(stream, boxSize, boxType));
 		}
 	}
 	
-	private Box constructBox(InputStream stream, int size, String type, int position) throws Exception {
+	private Box constructBox(MP4Stream stream, int size, String type) throws Exception {
 		switch(type) {
 		case "mdhd":
-			return new MDHD(stream, size, type, position);
+			this.MDHD = new MDHD(stream, size, type);
+			return this.MDHD;
 		case "hdlr":
-			this.HDLR = new HDLR(stream, size, type, position);
+			this.HDLR = new HDLR(stream, size, type);
 			this.hdlrType = this.HDLR.getHandlerType();
 			return this.HDLR;
 		case "minf":
-			return new MINF(stream, size, type, position, this.hdlrType);
+			this.MINF = new MINF(stream, size, type);
+			return this.MINF;
 		default:
-			return new nullBox(stream, size, type, position);
+			return new nullBox(stream, size, type);
 		}
+	}
+	
+	public STBL getStbl() {
+		return this.MINF.getStbl();
 	}
 	
 	@Override

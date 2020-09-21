@@ -1,79 +1,72 @@
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class mp4Parser {
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		String sourceFilePath = "../mp4 Parser/file_example_MP4_480_1_5MG.mp4";
-		
+		String bigBuckBunny = "../../Downloads/BigBuckBunny2.mp4";
+		String fragSourceFilePath = "../../Downloads/fileExampleMP4.mp4";
+		String certainaccel = "../../Downloads/02_A_Certain_Scientific_Accelerator.mp4";
 		try {
-			InputStream inputStream = new BufferedInputStream(new FileInputStream(sourceFilePath));
-//			System.out.println(inputStream.available());
-//			for(int i=0; i<4; i++) {
-//				int data = inputStream.read();
-//			}
-//			inputStream.mark(8);
-//			System.out.println(inputStream.available());
-//			for(int i=0; i<4; i++) {
-//				int data = inputStream.read();
-//			}
-//			System.out.println(inputStream.available());
-//			inputStream.reset();
-//			String type = getType(inputStream);
-//			System.out.println(type);
-//			
-//			System.out.println(inputStream.available());
-			
-			boolean isEndOfFile = false;
+			MP4Stream inputStream = new MP4Stream(certainaccel);
 			int endOfFilePos = inputStream.available();
-			System.out.println(endOfFilePos);
-			int pos = 0;
-			while(!isEndOfFile) {
-				int size = getSize(inputStream);
-				String type = getType(inputStream);
-				pos += 8;
-				Box box = constructBox(inputStream, size, type, pos);
-				System.out.println(box);
-				pos = box.getEndPos();
-				if(pos >= endOfFilePos) {
-					isEndOfFile = true;
-				}
+			ArrayList<Box> mp4 = new ArrayList<>();
+			ContainerBox container = new ContainerBox();
+			int size;
+			String type;
+			
+			// read and create each box until it the end of file
+			while(inputStream.getPos() < endOfFilePos) {
+				size = getSize(inputStream);
+				type = getType(inputStream);
+				Box box = constructBox(inputStream, size, type);
+				mp4.add(box);
+				container.add(box);
 			}
+			
+			// if the file is fmp4, do not update mdat file
+			if(container.isFragmented) {
+				container.printBoxes();
+			} else {
+				MOOV moov = container.moov;
+				container.mdat.update(moov.getTraks());
+				container.printBoxes();
+			}
+			
 		} catch(Exception e) {
-			throw(e);
-		}
-	}
-	
-	public static Box constructBox(InputStream stream, int size, String type, int pos) throws Exception {
-		switch(type) {
-		case "ftyp":
-			return new FTYP(stream, size, type,pos);
-		case "moov":
-			return new MOOV(stream, size, type, pos);
-		default:
-			return new nullBox(stream,size, type, pos);
-		}
-	}
-	
-	public static int getSize(InputStream stream) {
-		byte[] b = new byte[4];
-		String hex = "";
-		try {
-			int data = stream.read(b, 0, 4);
-			if(data != -1) {
-				for(int i=0; i<4; i++) {
-					String str = Integer.toHexString(b[i] & 0xFF);
-					if(str.length() == 1) {
-						str = "0" + str;
-					}
-					hex += str;
-				}
-			}
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return Integer.parseInt(hex, 16);
+	}
+	
+	public static Box constructBox(MP4Stream stream, int size, String type) throws Exception {
+		switch(type) {
+		case "ftyp":
+			return new FTYP(stream, size, type);
+		case "moov":
+			return new MOOV(stream, size, type);
+		case "mdat":
+			return new MDAT(stream, size, type);
+		case "udta":
+			return new UDTA(stream, size, type);
+		case "moof":
+			return new MOOF(stream, size , type);
+		default:
+			return new nullBox(stream,size, type);
+		}
+	}
+	
+	public static int getSize(MP4Stream stream) throws Exception {
+		byte[] b = new byte[4];
+		int data = stream.read(b, 0, 4);
+		int res = 0;
+		if(data != -1) {
+			for(int i=0; i<4; i++) {
+				int num = b[i] & 0xFF;
+				res += (num << 8*(3-i));
+			}
+		}
+		return res;
 	}
 	
 	public static String getType(InputStream stream) throws IOException {
@@ -87,6 +80,39 @@ public class mp4Parser {
 			return new String(c);
 		} else {
 			return "";
+		}
+	}
+	
+	// static nested class to store boxes
+	static class ContainerBox {
+		public boolean isFragmented = false;
+		public FTYP ftyp;
+		public MOOV moov;
+		public MDAT mdat;
+		public ArrayList<Box> boxes = new ArrayList<>();
+		
+		public void add(Box box) {
+			if(box.type.equals("fytp")) {
+				this.ftyp = (FTYP) box;
+				boxes.add(this.ftyp);
+			} else if(box.type.equals("moov")) {
+				this.moov = (MOOV) box;
+				boxes.add(this.moov);
+			} else if(box.type.equals("mdat")) {
+				this.mdat = (MDAT) box;
+				boxes.add(this.mdat);
+			} else if(box.type.equals("moof")) {
+				this.isFragmented = true;
+				boxes.add((MOOF) box);
+			} else if(box.type.equals("udta")) {
+				boxes.add((UDTA) box);
+			} else {
+				boxes.add(box);
+			}
+		}
+		
+		public void printBoxes() {
+			this.boxes.forEach(System.out::println);
 		}
 	}
 }

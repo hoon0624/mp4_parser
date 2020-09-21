@@ -1,16 +1,16 @@
-import java.io.InputStream;
-
+/*
+ * Hint Media Header contains general info for hint tracks
+ */
 public class HMHD extends FullBox {
 
-	private int maxPDUsize;
-	private int avgPDUsize;
-	private int maxbitrate;
-	private int avgbitrate;
-	private int reserved = 0;
+	private int maxPDUsize;		// 16 bits
+	private int avgPDUsize;		// 16 bits
+	private int maxbitrate;		// 32 bits
+	private int avgbitrate;		// 32 bits
+	private int reserved = 0;	// 32 bits
 	
-	HMHD(InputStream stream, int size, String type, int position) {
-		super(stream, size, type, position);
-		position += 4;
+	HMHD(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
 		this.maxPDUsize = this.readStreamAsInt(stream, 2);
 		this.avgPDUsize = this.readStreamAsInt(stream, 2);
 		this.maxbitrate = this.readStreamAsInt(stream, 4);
@@ -30,5 +30,4 @@ public class HMHD extends FullBox {
 		
 		return str.toString();
 	}
-	
 }

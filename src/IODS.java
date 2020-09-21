@@ -1,8 +1,9 @@
-import java.io.InputStream;
-
+/*
+ * Object Descriptor Box
+ */
 public class IODS extends Box {
-	IODS(InputStream stream, int size, String type, int position) throws Exception {
-		super(stream, size, type, position);
-		this.skipToNextBox(stream, 8);
+	IODS(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
+		this.skipToNextBox(stream);
 	}
 }

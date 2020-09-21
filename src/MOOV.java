@@ -1,42 +1,42 @@
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class MOOV extends Box {
 	
 	private ArrayList<Box> childBoxes = new ArrayList<>();
-	private Box MVHD;
-	private Box IODS;
+	private MVHD MVHD;
+	private IODS IODS;
 	private ArrayList<TRAK> TRAKS = new ArrayList<>();
 	
-	MOOV(InputStream stream, int size, String type, int position) throws Exception {
-		super(stream, size, type, position);
-		while(position < this.endPos) {
+	MOOV(MP4Stream stream, int size, String type) throws Exception {
+		super(stream, size, type);
+		while(stream.getPos() < this.endPos) {
 			int boxSize = this.readStreamAsInt(stream, 4);
 			String boxType = this.readStreamAsString(stream, 4);
-			position += 8;
-			Box box = constructBox(stream, boxSize, boxType, position);
-			this.childBoxes.add(box);
-			position = box.endPos;
-			System.out.println("MOOV: " + box.endPos);
-			System.out.println("MOOV size: " + boxSize);
+			this.childBoxes.add(constructBox(stream, boxSize, boxType));
 		}
 	}
 	
-	private Box constructBox(InputStream stream, int size, String type, int pos) throws Exception {
+	private Box constructBox(MP4Stream stream, int size, String type) throws Exception {
 		switch(type) {
 		case "mvhd":
-			this.MVHD = new MVHD(stream, size, type, pos);
+			this.MVHD = new MVHD(stream, size, type);
 			return this.MVHD;
 		case "iods":
-			this.IODS = new IODS(stream, size, type, pos);
+			this.IODS = new IODS(stream, size, type);
 			return this.IODS;
 		case "trak":
-			TRAK trak = new TRAK(stream, size, type, pos);
+			TRAK trak = new TRAK(stream, size, type);
 			TRAKS.add(trak);
 			return trak;
+		case "udta":
+			return new UDTA(stream, size, type);
 		default:
-			return new nullBox(stream, size, type, pos);
+			return new nullBox(stream, size, type);
 		}
+	}
+	
+	public ArrayList<TRAK> getTraks() {
+		return this.TRAKS;
 	}
 	
 	@Override 
