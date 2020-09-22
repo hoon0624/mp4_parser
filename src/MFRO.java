@@ -4,7 +4,7 @@
  */
 public class MFRO extends FullBox {
 
-	private int size;
+	private int size;	// 32 bits
 	
 	MFRO(MP4Stream stream, int size, String type) throws Exception {
 		super(stream, size, type);

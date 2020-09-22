@@ -16,15 +16,17 @@ public class MDAT extends Box {
 		stream.read(new byte[this.endPos - stream.getPos()]);
 	}
 	
-	public void update(ArrayList<TRAK> Traks) throws Exception {
+	public void printMDATSamples(ArrayList<TRAK> Traks) throws Exception {
 		for(TRAK trak : Traks) {
 			ArrayList<Sample> samples = getSamples(trak.getStbl());
 			this.Samples.add(samples);
 			this.hdlrTypes.add(trak.getHdlrType());
 		}
+		printSamples();
 		this.cpyStream.close();
 	}
 	
+	// get and organize samples data
 	private ArrayList<Sample> getSamples(STBL stbl) throws Exception {
 		STSZ stsz = stbl.getStsz();
 		STTS stts = stbl.getStts();
@@ -64,7 +66,7 @@ public class MDAT extends Box {
 				isIframe = false;
 			}
 			
-			samples.add(new Sample(size, duration, offset, isIframe, this.cpyStream));
+			samples.add(new Sample(size, duration, offset, isIframe));
 			
 			offset += size;
 			if(i >= 20) {
@@ -74,82 +76,101 @@ public class MDAT extends Box {
 		return samples;
 	}
 	
-	
-	
-	@Override 
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append(super.toString());
-		str.append("\n");
-		for(int i=0; i<this.Samples.size(); i++) {
-			int[] j = {0};
-			str.append(this.hdlrTypes.get(i) + " Samples:\n\n");
-			this.Samples.get(i).forEach(s -> {
-				str.append("Sample_" + j[0] + ": " + s);
-				j[0]++;
-			});
-			str.append("\n");
+	// convert and print mdat data into hexString and ascii characters
+	private void dataToHexnASCII(byte[] data) {
+		ArrayList<String> str = new ArrayList<>();
+		StringBuilder hexStr = new StringBuilder();
+		StringBuilder asciiStr = new StringBuilder();
+		int count = 0;
+		for(int i=0; i<data.length; i++) {
+			String hex = Integer.toHexString(data[i] & 0xFF);
+			if(hex.length() == 1) {
+				hex = "0" + hex;
+			}
+			hexStr.append(hex);
+			char ascii = '.';
+			if(data[i] > 31) {
+				ascii = (char) data[i];
+			}
+			asciiStr.append(ascii);
+			if(count%16 == 15) {
+				str.add(hexStr.toString() + "\t\t" + asciiStr.toString() + "\n\t");
+				hexStr = new StringBuilder();
+				asciiStr = new StringBuilder();
+			} 
+			else if(count%4 == 3) {
+				hexStr.append(" ");
+				asciiStr.append(" ");
+			}
+			count++;
 		}
 		
-		return str.toString();
+		if(data.length < 48 && data.length%16 != 0) {
+			int n = 35 - (hexStr.length()%35);
+			for(int j=0; j<n; j++) {
+				hexStr.append(" ");
+			}
+			str.add(hexStr.toString() + "\t\t" + asciiStr.toString() + "\n\t");
+		}
+
+		str.forEach(System.out::print);
 	}
 	
+	private void printSamples() throws Exception {
+		int hdlrN = 0;
+		for(ArrayList<Sample> samples : this.Samples) {
+			int i = 0;
+			System.out.println("\n" + this.hdlrTypes.get(hdlrN)+ " Samples:\n");		// print handler type of samples
+			for(Sample sample : samples) {
+				// if sample position has passed, make another stream 
+				if(sample.endPos < this.cpyStream.getPos()) {
+					this.cpyStream.close();
+					this.cpyStream = new MP4Stream(this.cpyStream.getSourceFilePath());
+					this.cpyStream.skip(sample.endPos - sample.size);
+				}
+				byte[] data;
+				System.out.println("Sample_" + i + ": " + sample);
+				
+				// read up to 48 bytes
+				if(sample.size < 48) {
+					data = new byte[sample.size];
+				} else {
+					data = new byte[48];
+				}
+				this.cpyStream.read(data);
+				System.out.print("Data:\n\t");
+				dataToHexnASCII(data);
+				System.out.println();
+				this.cpyStream.read(new byte[sample.endPos - this.cpyStream.getPos()]);
+				i++;
+			}
+			hdlrN++;
+		}
+		this.cpyStream.close();
+	}
+	
+	// nested class for Sample object
 	private class Sample {
 		public int size;
 		public int duration;
 		public int offSet;
-		public byte[] data;
 		public boolean isIFrame = false;
 		public int endPos;
 		
-		public Sample(int size, int duration, int offSet, boolean bool, MP4Stream stream) throws IOException {
+		public Sample(int size, int duration, int offSet, boolean bool) throws IOException {
 			this.size = size;
 			this.duration = duration;
 			this.offSet = offSet;
 			this.isIFrame = bool;
-			if(size < 48) {
-				this.data = new byte[size];
-			} else {
-				this.data = new byte[48];
-			}
 			this.endPos = this.offSet + this.size;
-			stream.read(data);
-			int streamPos = (int) stream.getPos();
-			if(streamPos < this.endPos) {
-				stream.read(new byte[this.endPos - streamPos]);
-			}
-		}
-		
-		private String dataToHexString() {
-			StringBuilder str = new StringBuilder();
-			int count = 0;
-			for(int i=0; i<this.data.length; i++) {
-				String hex = Integer.toHexString(this.data[i] & 0xFF);
-				if(hex.length() == 1) {
-					hex = "0" + hex;
-				}
-				str.append(hex);
-				
-				if(count%16 == 15) {
-					str.append("\n\t");
-				} 
-				else if(count%4 == 3) {
-					str.append(" ");
-				}
-				count++;
-			}
-			
-			return str.toString();
 		}
 		
 		public String toString() {
 			String str = "{size: " + this.size + ", duration: " + this.duration 
-					+ ", offset: " + this.offSet + "}\n";
+					+ ", offset: " + this.offSet + "}";
 			if(this.isIFrame) {
 				str = "I-frame " + str;
-			}
-			str += "Data:\n\t" + dataToHexString() + "\n";
-			
+			}			
 			return str;
 		}
 	}

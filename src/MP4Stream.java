@@ -21,5 +21,9 @@ public class MP4Stream extends FileInputStream {
 	public int getPos() throws IOException {
 		return (int) this.getChannel().position();
 	}
+	
+	public String getSourceFilePath() {
+		return this.sourceFilePath;
+	}
 
 }

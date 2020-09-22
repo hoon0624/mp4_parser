@@ -44,8 +44,8 @@ public class SIDX extends FullBox {
 	private int[] readByteInBits(InputStream stream) throws IOException {
 		int data = stream.read();
 		int[] tmp = new int[2];
-		tmp[0] = data >> 7;
-		tmp[1] = (data & 127) << 24;
+		tmp[0] = data >> 7;		// shift right 7 bits
+		tmp[1] = (data & 127) << 24;		// data & 01111111 and shift left 24 bits
 		
 		return tmp;
 	}

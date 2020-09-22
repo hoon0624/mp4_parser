@@ -5,14 +5,13 @@ import java.util.ArrayList;
 public class mp4Parser {
 	public static void main(String[] args) {
 		String sourceFilePath = "../mp4 Parser/file_example_MP4_480_1_5MG.mp4";
-		String bigBuckBunny = "../../Downloads/BigBuckBunny2.mp4";
+		String bigBuckBunny = "../../Downloads/BigBuckBunny.mp4";
 		String fragSourceFilePath = "../../Downloads/fileExampleMP4.mp4";
 		String certainaccel = "../../Downloads/02_A_Certain_Scientific_Accelerator.mp4";
 		String fragmentedMP4 = "../../Downloads/video_960_30.mp4";
 		try {
-			MP4Stream inputStream = new MP4Stream(fragmentedMP4);
+			MP4Stream inputStream = new MP4Stream(bigBuckBunny);
 			int endOfFilePos = inputStream.available();
-			ArrayList<Box> mp4 = new ArrayList<>();
 			ContainerBox container = new ContainerBox();
 			int size;
 			String type;
@@ -22,8 +21,6 @@ public class mp4Parser {
 				size = getSize(inputStream);
 				type = getType(inputStream);
 				Box box = constructBox(inputStream, size, type);
-				System.out.println(box);
-				mp4.add(box);
 				container.add(box);
 			}
 			
@@ -32,8 +29,8 @@ public class mp4Parser {
 				container.printBoxes();
 			} else {
 				MOOV moov = container.moov;
-				container.mdat.update(moov.getTraks());
 				container.printBoxes();
+				container.mdat.printMDATSamples(moov.getTraks());
 			}
 			
 		} catch(Exception e) {

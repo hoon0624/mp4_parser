@@ -16,6 +16,12 @@ public class SDTP extends FullBox {
 	SDTP(MP4Stream stream, int size, String type) throws Exception {
 		super(stream, size, type);
 		this.needUpdate = true;
+		int i = 0;
+		while(stream.getPos() < this.endPos) {
+			sampleDependencies.add(readByteInBits(stream));
+			i++;
+		}
+		this.entry_count = i;
 		this.skipToNextBox(stream);
 	}
 	
