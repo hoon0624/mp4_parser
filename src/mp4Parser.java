@@ -4,13 +4,9 @@ import java.util.ArrayList;
 
 public class mp4Parser {
 	public static void main(String[] args) {
-		String sourceFilePath = "../mp4 Parser/file_example_MP4_480_1_5MG.mp4";
-		String bigBuckBunny = "../../Downloads/BigBuckBunny.mp4";
-		String fragSourceFilePath = "../../Downloads/fileExampleMP4.mp4";
-		String certainaccel = "../../Downloads/02_A_Certain_Scientific_Accelerator.mp4";
-		String fragmentedMP4 = "../../Downloads/video_960_30.mp4";
 		try {
-			MP4Stream inputStream = new MP4Stream(bigBuckBunny);
+			String sourceFilePath = args[0];
+			MP4Stream inputStream = new MP4Stream(sourceFilePath);
 			int endOfFilePos = inputStream.available();
 			ContainerBox container = new ContainerBox();
 			int size;
